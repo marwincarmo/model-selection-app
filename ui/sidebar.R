@@ -4,6 +4,8 @@ sidebar <- dashboardSidebar(
     id = "tabs",
     menuItem("Main", tabName = "main_tab",
              icon = icon("home")),
+    menuItem("Simulation", tabName = "sim_tab",
+             icon = icon("home")),
     menuItem("Info", tabName = "info_tab",
              icon = icon("info"))
   ),

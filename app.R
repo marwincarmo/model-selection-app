@@ -5,7 +5,7 @@ suppressPackageStartupMessages({
     library(shinydashboard)
 })
 
-## functions ----
+## Functions ----
 
 # source("R/func.R") # put long functions in external files
 
@@ -21,28 +21,14 @@ debug_msg <- function(...) {
     }
 }
 
-## tabs ----
+## Tabs ----
 
 # you can put complex tabs in separate files and source them
-#source("ui/main_tab.R")
-#source("ui/info_tab.R")
+source("ui/header.R")
+source("ui/sidebar.R")
+source("ui/main_tab.R")
+source("ui/info_tab.R")
 
-# main_tab ----
-main_tab <- tabItem(
-    tabName = "main_tab",
-    h2("Main"),
-    box(id = "flower_box", title = "Flower", collapsible = T,
-        HTML("<img src='img/flower.jpg' width = '100%'>")
-    ),
-    actionButton("show_flower", "Show Flower"),
-    actionButton("hide_flower", "Hide Flower")
-)
-
-# info_tab ----
-info_tab <- tabItem(
-    tabName = "info_tab",
-    h2("Info")
-)
 
 
 # if the header and/or sidebar get too complex, 
@@ -54,19 +40,19 @@ info_tab <- tabItem(
 ## UI ----
 ui <- dashboardPage(
     skin = "purple",
-    # header, # if sourced above
-    dashboardHeader(title = "Template"),
-    # sidebar, # if sourced above
-    dashboardSidebar(
+    header = header, # if sourced above
+    #dashboardHeader(title = "Template"),
+    sidebar = sidebar, # if sourced above
+    #dashboardSidebar(
         # https://fontawesome.com/icons?d=gallery&m=free
-        sidebarMenu(
-            id = "tabs",
-            menuItem("Main", tabName = "main_tab",
-                     icon = icon("home")),
-            menuItem("Info", tabName = "info_tab",
-                     icon = icon("info"))
-        )
-    ),
+    #    sidebarMenu(
+    #        id = "tabs",
+    #        menuItem("Main", tabName = "main_tab",
+    #                 icon = icon("home")),
+    #        menuItem("Info", tabName = "info_tab",
+    #                 icon = icon("info"))
+        
+    
     dashboardBody(
         shinyjs::useShinyjs(),
         tags$head(
@@ -75,10 +61,12 @@ ui <- dashboardPage(
         ),
         tabItems(
             main_tab,
+            sim_tab,
             info_tab
         )
     )
 )
+
 
 
 ## server ----
@@ -91,6 +79,22 @@ server <- function(input, output, session) {
     observeEvent(input$hide_flower, {
         debug_msg("hide_flower", input$hide_flower)
         runjs("closeBox('flower_box');")
+    })
+    # simulate
+    observeEvent(input$simulate, {
+        debug_msg("simulate", input$simulate)
+        # input check
+        is_integer <- as.integer(input$sample_size) == input$sample_size
+        is_pos <- input$sample_size >= 1
+        is_bounded <- (input$corr >= -1) & (input$corr <= 1)
+        
+        if(!is_integer || !is_pos){
+            shiny::showNotification("Please fix sample size value. Choose a whole number greater than zero")
+        }
+        if(!is_bounded){
+            shiny::showNotification("Please choose a correlation value between -1 and 1")
+        }
+        
     })
 } 
 
