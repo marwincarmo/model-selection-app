@@ -38,8 +38,11 @@ sim_tab <- tabItem(
                      value = 1,
                      min = 1),
         numericInput(inputId = "coefs",
-                     label = "True coefficient",
+                     label = "True coefficient value",
                      value = 0),
+        numericInput(inputId = "snr",
+                     label = "Signal Noise Ratio",
+                     value = 0.5),
         actionButton("simulate", "Simulate")
         
   ),

@@ -90,12 +90,50 @@ server <- function(input, output, session) {
         
         if(!is_integer || !is_pos){
             shiny::showNotification("Please fix sample size value. Choose a whole number greater than zero")
+            return()
         }
         if(!is_bounded){
             shiny::showNotification("Please choose a correlation value between -1 and 1")
+            return()
         }
         
+        # simulate data
+        p <- input$n_param
+        SNR <- input$snr
+        Sigma <- matrix(input$corr, p, p)
+        diag(Sigma) <- 1
+        n = input$sample_size
+        b0 <- input$intercept
+        beta <- rep(input$coefs, p)
+        names(beta) <- paste0("x", 1:p)
+        reps = input$simulations
+        coefs <- cover <- matrix(NA, nrow = reps, ncol = p)
+        sigma_error <-  sqrt(as.numeric(crossprod(beta, Sigma %*% beta) / SNR))
+        colnames(coefs) <- paste0("x", 1:p)
+        colnames(cover) <- paste0("x", 1:p)
+        
+        for (i in seq(reps)) {
+            
+            X <-  MASS::mvrnorm(n = n, rep(0, p) , Sigma)
+            y <- as.numeric(cbind(1, X) %*% c(b0, beta) + rnorm(n, 0, sigma_error))
+            Xy <- as.data.frame( cbind(X, y))
+            colnames(Xy) <- c(paste0("x", 1:p), "y")
+            fit <- lm(y ~ ., data = Xy)
+            coefs[i, ] <- coef(fit)[-1]
+            cis <- confint(fit)[-1,]
+            cover[i,] <- ifelse(cis[,1] < 1 & cis[,2] > 1, 1, 0)
+        }
+        
+        res <- data.frame(
+            pred = paste0("x", 1:p),
+            mean_coef = colMeans(coefs),
+            cover = colMeans(cover),
+            mse = colMeans((coefs - beta)^2)
+            
+        )
     })
+    
+    output$results <- renderTable(res)
 } 
 
 shinyApp(ui, server)
