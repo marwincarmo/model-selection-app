@@ -24,7 +24,7 @@ debug_msg <- function(...) {
 ## Tabs ----
 
 # you can put complex tabs in separate files and source them
-source("ui/header.R")
+
 source("ui/sidebar.R")
 source("ui/main_tab.R")
 source("ui/info_tab.R")
@@ -60,7 +60,6 @@ ui <- dashboardPage(
             tags$script(src = "custom.js") # links to www/custom.js
         ),
         tabItems(
-            main_tab,
             sim_tab,
             info_tab
         )
@@ -105,16 +104,19 @@ server <- function(input, output, session) {
         reps <- input$simulations
         p <- input$n_param
         n <- input$sample_size
+        # SNR can't be 0
         SNR <- input$snr
         Sigma <- matrix(input$corr, p, p)
         diag(Sigma) <- 1
         b0 <- input$intercept
         beta <- rep(input$coefs, p)
         names(beta) <- paste0("x", 1:p)
-        coefs <- cover <- matrix(NA, nrow = reps, ncol = p)
+        coefs <- cover <- tvals <- matrix(NA, nrow = reps, ncol = p)
+        rsq <- NULL
         sigma_error <-  sqrt(as.numeric(crossprod(beta, Sigma %*% beta) / SNR))
         colnames(coefs) <- paste0("x", 1:p)
         colnames(cover) <- paste0("x", 1:p)
+        colnames(tvals) <- paste0("x", 1:p)
         
         for (i in seq(reps)) {
             
@@ -125,10 +127,13 @@ server <- function(input, output, session) {
             fit <- lm(y ~ ., data = Xy)
             s <- summary(fit)
             tval <- s$coefficients[,3][-1]
+            tvals[i, names(tval)] <-  tval
             coefs[i, names(tval)] <- coef(fit)[-1]
             cis <- confint(fit)[-1,]
+            rsq[i] <- s$r.squared
+            # avoids error if there is only one predictor selected
             if (length(cis) < 3) {
-                cover[i,names(tval)] <- ifelse(cis[1] < 1 & cis[2] > 1, 1, 0)
+                cover[i,names(tval)] <- ifelse(cis[1] < beta[names(tval)] & cis[2] > beta[names(tval)], 1, 0)
             } else {
                 cover[i,names(tval)] <- ifelse(cis[names(tval),1] < beta[names(tval)] & cis[names(tval),2] > beta[names(tval)], 1, 0)
             }
@@ -137,8 +142,10 @@ server <- function(input, output, session) {
         # results dataframe ----
         df$res <- data.frame(
             pred = paste0("x", 1:p),
+            rsq = mean(rsq),
             mean_coef = colMeans(coefs),
             cover = colMeans(cover),
+            bias = colMeans((coefs - beta)),
             mse = colMeans((coefs - beta)^2)
             
         )

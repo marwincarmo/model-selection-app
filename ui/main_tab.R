@@ -1,14 +1,3 @@
-# main_tab ----
-main_tab <- tabItem(
-  tabName = "main_tab",
-  p("Some explanation about the app"),
-  box(id = "flower_box", title = "Flower", collapsible = T,
-      HTML("<img src='img/flower.jpg' width = '100%'>")
-  ),
-  actionButton("show_flower", "Show Flower"),
-  actionButton("hide_flower", "Hide Flower")
-)
-
 # sim_tab ----
 sim_tab <- tabItem(
   tabName = "sim_tab",
@@ -32,7 +21,7 @@ sim_tab <- tabItem(
                      step = 10),
         numericInput(inputId = "intercept",
                      label = "Intercept",
-                     value = 0),
+                     value = 1),
         numericInput(inputId = "n_param",
                      label = "Number of parameters",
                      value = 1,
@@ -41,8 +30,9 @@ sim_tab <- tabItem(
                      label = "True coefficient value",
                      value = 0),
         numericInput(inputId = "snr",
-                     label = "Signal Noise Ratio",
-                     value = 0.5),
+                     label = "Signal to Noise Ratio",
+                     value = 0.5,
+                     step = .1),
         actionButton("simulate", "Simulate")
         
   ),
