@@ -71,6 +71,10 @@ ui <- dashboardPage(
 
 ## server ----
 server <- function(input, output, session) {
+    
+    # reactive variables ----
+    df <- reactiveValues()
+    
     observeEvent(input$show_flower, {
         debug_msg("show_flower", input$show_flower)
         runjs("openBox('flower_box');")
@@ -97,16 +101,16 @@ server <- function(input, output, session) {
             return()
         }
         
-        # simulate data
+        # simulation ----
+        reps <- input$simulations
         p <- input$n_param
+        n <- input$sample_size
         SNR <- input$snr
         Sigma <- matrix(input$corr, p, p)
         diag(Sigma) <- 1
-        n = input$sample_size
         b0 <- input$intercept
         beta <- rep(input$coefs, p)
         names(beta) <- paste0("x", 1:p)
-        reps = input$simulations
         coefs <- cover <- matrix(NA, nrow = reps, ncol = p)
         sigma_error <-  sqrt(as.numeric(crossprod(beta, Sigma %*% beta) / SNR))
         colnames(coefs) <- paste0("x", 1:p)
@@ -116,15 +120,22 @@ server <- function(input, output, session) {
             
             X <-  MASS::mvrnorm(n = n, rep(0, p) , Sigma)
             y <- as.numeric(cbind(1, X) %*% c(b0, beta) + rnorm(n, 0, sigma_error))
-            Xy <- as.data.frame( cbind(X, y))
+            Xy <- as.data.frame(cbind(X, y))
             colnames(Xy) <- c(paste0("x", 1:p), "y")
             fit <- lm(y ~ ., data = Xy)
-            coefs[i, ] <- coef(fit)[-1]
+            s <- summary(fit)
+            tval <- s$coefficients[,3][-1]
+            coefs[i, names(tval)] <- coef(fit)[-1]
             cis <- confint(fit)[-1,]
-            cover[i,] <- ifelse(cis[,1] < 1 & cis[,2] > 1, 1, 0)
+            if (length(cis) < 3) {
+                cover[i,names(tval)] <- ifelse(cis[1] < 1 & cis[2] > 1, 1, 0)
+            } else {
+                cover[i,names(tval)] <- ifelse(cis[names(tval),1] < beta[names(tval)] & cis[names(tval),2] > beta[names(tval)], 1, 0)
+            }
         }
         
-        res <- data.frame(
+        # results dataframe ----
+        df$res <- data.frame(
             pred = paste0("x", 1:p),
             mean_coef = colMeans(coefs),
             cover = colMeans(cover),
@@ -133,7 +144,10 @@ server <- function(input, output, session) {
         )
     })
     
-    output$results <- renderTable(res)
+    # res_table ----
+    output$res_table <- renderTable({
+        df$res
+    })
 } 
 
 shinyApp(ui, server)

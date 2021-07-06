@@ -46,6 +46,6 @@ sim_tab <- tabItem(
         actionButton("simulate", "Simulate")
         
   ),
-  tableOutput("results"),
+  tableOutput("res_table"),
   plotOutput("sim_plot")
 )
