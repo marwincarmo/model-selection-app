@@ -5,6 +5,7 @@ suppressPackageStartupMessages({
     library(shinydashboard)
     library(ggplot2)
     library(dplyr)
+    library(MASS)
 })
 
 ## Functions ----
@@ -111,8 +112,10 @@ server <- function(input, output, session) {
         diag(Sigma) <- 1
         b0 <- input$intercept
         beta <- rep(input$coefs, p)
+        selection <- input$sel_method
         names(beta) <- paste0("x", 1:p)
-        coefs <- cover <- tvals <- matrix(NA, nrow = reps, ncol = p)
+        coefs <- tvals <- matrix(0, nrow = reps, ncol = p)
+        cover <- matrix(0, nrow = reps, ncol = p)
         rsq <- NULL
         sigma_error <-  sqrt(as.numeric(crossprod(beta, Sigma %*% beta) / SNR))
         colnames(coefs) <- paste0("x", 1:p)
@@ -126,11 +129,16 @@ server <- function(input, output, session) {
             Xy <- as.data.frame(cbind(X, y))
             colnames(Xy) <- c(paste0("x", 1:p), "y")
             fit <- lm(y ~ ., data = Xy)
-            s <- summary(fit)
+            if (selection == "AIC") {
+                sel <- step(fit, k = 2, trace = FALSE)
+            } else {
+                sel <- step(fit, k = log(n) , trace = FALSE)
+            }
+            s <- summary(sel)
             tval <- s$coefficients[,3][-1]
             tvals[i, names(tval)] <-  tval
-            coefs[i, names(tval)] <- coef(fit)[-1]
-            cis <- confint(fit)[-1,]
+            coefs[i, names(tval)] <- coef(sel)[-1]
+            cis <- confint(sel)[-1,]
             rsq[i] <- s$r.squared
             # avoids error if there is only one predictor selected
             if (length(cis) < 3) {

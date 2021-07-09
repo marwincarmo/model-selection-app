@@ -23,7 +23,7 @@ sim_tab <- tabItem(
                      label = "Intercept",
                      value = 1),
         numericInput(inputId = "n_param",
-                     label = "Number of parameters",
+                     label = "Number of predictors",
                      value = 1,
                      min = 1),
         numericInput(inputId = "coefs",
@@ -33,6 +33,10 @@ sim_tab <- tabItem(
                      label = "Signal to Noise Ratio",
                      value = 0.5,
                      step = .1),
+        selectInput(inputId = "sel_method",
+                    label = "Selection method",
+                    choices = c("AIC", "BIC"),
+                    ),
         actionButton("simulate", "Simulate")
         
   ),
