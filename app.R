@@ -3,6 +3,8 @@ suppressPackageStartupMessages({
     library(shiny)
     library(shinyjs)
     library(shinydashboard)
+    library(ggplot2)
+    library(dplyr)
 })
 
 ## Functions ----
@@ -40,8 +42,7 @@ source("ui/info_tab.R")
 ## UI ----
 ui <- dashboardPage(
     skin = "purple",
-    header = header, # if sourced above
-    #dashboardHeader(title = "Template"),
+    dashboardHeader(title = "Model selection simulation"),
     sidebar = sidebar, # if sourced above
     #dashboardSidebar(
         # https://fontawesome.com/icons?d=gallery&m=free
@@ -56,8 +57,8 @@ ui <- dashboardPage(
     dashboardBody(
         shinyjs::useShinyjs(),
         tags$head(
-            tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"), # links to www/custom.css
-            tags$script(src = "custom.js") # links to www/custom.js
+             tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"), # links to www/custom.css
+             tags$script(src = "custom.js") # links to www/custom.js
         ),
         tabItems(
             sim_tab,
