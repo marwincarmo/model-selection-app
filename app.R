@@ -76,15 +76,6 @@ server <- function(input, output, session) {
     # reactive variables ----
     df <- reactiveValues()
     
-    observeEvent(input$show_flower, {
-        debug_msg("show_flower", input$show_flower)
-        runjs("openBox('flower_box');")
-    })
-    
-    observeEvent(input$hide_flower, {
-        debug_msg("hide_flower", input$hide_flower)
-        runjs("closeBox('flower_box');")
-    })
     # simulate
     observeEvent(input$simulate, {
         debug_msg("simulate", input$simulate)
@@ -114,7 +105,7 @@ server <- function(input, output, session) {
         beta <- rep(input$coefs, p)
         selection <- input$sel_method
         names(beta) <- paste0("x", 1:p)
-        coefs <- tvals <- matrix(0, nrow = reps, ncol = p)
+        coefs <- tvals <- matrix(NA, nrow = reps, ncol = p)
         cover <- matrix(0, nrow = reps, ncol = p)
         rsq <- NULL
         sigma_error <-  sqrt(as.numeric(crossprod(beta, Sigma %*% beta) / SNR))
@@ -152,10 +143,10 @@ server <- function(input, output, session) {
         df$res <- data.frame(
             pred = paste0("x", 1:p),
             rsq = mean(rsq),
-            mean_coef = colMeans(coefs),
+            mean_coef = colMeans(coefs, na.rm = TRUE),
             cover = colMeans(cover),
-            bias = colMeans((coefs - beta)),
-            mse = colMeans((coefs - beta)^2)
+            bias = colMeans((coefs - beta), na.rm = TRUE),
+            mse = colMeans((coefs - beta)^2, na.rm = TRUE)
             
         )
     })
