@@ -76,6 +76,7 @@ server <- function(input, output, session) {
     # reactive variables ----
     df <- reactiveValues()
     
+
     # simulate
     observeEvent(input$simulate, {
         debug_msg("simulate", input$simulate)
@@ -93,6 +94,14 @@ server <- function(input, output, session) {
             return()
         }
         
+        # Create a Progress object
+        #progress <- shiny::Progress$new()
+        # Make sure it closes when we exit this reactive, even if there's an error
+        #on.exit(progress$close())
+        
+        #progress$set(message = "Simulating dataset", value = 0)
+        
+        withProgress(message = 'Making plot', value = 0,{
         # simulation ----
         reps <- input$simulations
         p <- input$n_param
@@ -137,6 +146,9 @@ server <- function(input, output, session) {
             } else {
                 cover[i,names(tval)] <- ifelse(cis[names(tval),1] < beta[names(tval)] & cis[names(tval),2] > beta[names(tval)], 1, 0)
             }
+            # Increment the progress bar, and update the detail text.
+            #progress$inc(1/reps, detail = paste("Doing part", i))
+            incProgress(1/n, detail = paste("Doing part", i))
         }
         
         # results dataframe ----
@@ -151,10 +163,11 @@ server <- function(input, output, session) {
         )
     })
     
+    
     # res_table ----
     output$res_table <- renderTable({
-        df$res
-    })
-} 
-
+            df$res
+        })
+}) 
+}
 shinyApp(ui, server)

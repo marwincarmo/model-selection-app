@@ -28,7 +28,7 @@ sim_tab <- tabItem(
                      min = 1),
         numericInput(inputId = "coefs",
                      label = "True coefficient value",
-                     value = 0),
+                     value = 1),
         numericInput(inputId = "snr",
                      label = "Signal to Noise Ratio",
                      value = 0.5,
