@@ -1,0 +1,14 @@
+name: model-selection-app
+title: model-selection-app
+username:
+account: marwin
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4375029
+bundleId: 4809180
+url: https://marwin.shinyapps.io/model-selection-app/
+when: 1626042706.85447
+lastSyncTime: 1626042706.85447
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: app_testing.R|tests.R

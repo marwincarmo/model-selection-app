@@ -236,3 +236,8 @@ server <- function(input, output, session) {
     
 }
 shinyApp(ui, server)
+
+## To do:
+## Option for sampling distribution of coefficients
+## Separate R2 from the results table
+## Diagram explaining what is happening: generate data, select a model, then compute CIs
