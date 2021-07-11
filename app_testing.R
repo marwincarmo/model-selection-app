@@ -6,6 +6,7 @@ suppressPackageStartupMessages({
     library(ggplot2)
     library(dplyr)
     library(MASS)
+    library(purrr)
 })
 
 ## Functions ----
@@ -76,14 +77,13 @@ server <- function(input, output, session) {
     # reactive variables ----
     df <- reactiveValues()
     
-    # input the predictors coefficients
     predictors <- reactive(paste0("x", seq_len(input$n_param)))
     
     output$preds <- renderUI({
         purrr::map(predictors(), ~numericInput(.x, label = paste0("True coefficient value for ", .x), 
                                                value = 1, step = .1))
     })
-
+    
     # simulate
     observeEvent(input$simulate, {
         debug_msg("simulate", input$simulate)
@@ -110,7 +110,7 @@ server <- function(input, output, session) {
         
         # simulation ----
         reps <- input$simulations
-        p <- input$n_param
+        p <- input$n_pred
         n <- input$sample_size
         # SNR can't be 0
         SNR <- input$snr
