@@ -1,8 +1,10 @@
 # sim_tab ----
 sim_tab <- tabItem(
   tabName = "sim_tab",
-  
+  fluidRow(
+    column(width = 6,
     box(title = "Parameters setting",
+        width = NULL,
         solidHeader = TRUE,
         numericInput(inputId = "simulations",
                     label = "Simulations",
@@ -16,17 +18,12 @@ sim_tab <- tabItem(
                      step = 0.1),
         numericInput(inputId = "sample_size",
                      label = "Sample size",
-                     value = 250,
+                     value = 200,
                      min = 1,
                      step = 10),
         numericInput(inputId = "intercept",
                      label = "Intercept",
                      value = 1),
-        numericInput(inputId = "n_pred",
-                     label = "Number of predictors",
-                     value = 1,
-                     min = 1),
-        uiOutput("preds"),
         # numericInput(inputId = "coefs",
         #              label = "True coefficient value",
         #              value = 1),
@@ -40,7 +37,22 @@ sim_tab <- tabItem(
                     ),
         actionButton("simulate", "Simulate")
         
-  ),
-  tableOutput("res_table"),
-  plotOutput("sim_plot")
+  )),
+  column(width = 6,
+         box(width = NULL,
+             collapsible = TRUE,
+           numericInput(inputId = "n_pred",
+                        label = "Number of predictors",
+                        value = 1,
+                        min = 1),
+           uiOutput("preds")
+         ))),
+  fluidRow(
+    column(width = 6,
+      box(width = NULL,
+          reactableOutput("res_table"))),
+    column(width = 6,
+      box(width = NULL,
+          plotOutput("sim_plot")))
+  )
 )

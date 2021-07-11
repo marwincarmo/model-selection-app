@@ -6,6 +6,8 @@ suppressPackageStartupMessages({
     library(ggplot2)
     library(dplyr)
     library(MASS)
+    library(purrr)
+    library(reactable)
 })
 
 ## Functions ----
@@ -77,13 +79,13 @@ server <- function(input, output, session) {
     df <- reactiveValues()
     
     # input the predictors coefficients
-    predictors <- reactive(paste0("x", seq_len(input$n_param)))
+    predictors <- reactive(paste0("x", seq_len(input$n_pred)))
     
     output$preds <- renderUI({
         purrr::map(predictors(), ~numericInput(.x, label = paste0("True coefficient value for ", .x), 
                                                value = 1, step = .1))
     })
-
+    
     # simulate
     observeEvent(input$simulate, {
         debug_msg("simulate", input$simulate)
@@ -110,14 +112,14 @@ server <- function(input, output, session) {
         
         # simulation ----
         reps <- input$simulations
-        p <- input$n_param
+        p <- input$n_pred
         n <- input$sample_size
         # SNR can't be 0
         SNR <- input$snr
         Sigma <- matrix(input$corr, p, p)
         diag(Sigma) <- 1
         b0 <- input$intercept
-        beta <- map_dbl(predictors(), ~input[[.x]])
+        beta <- purrr::map_dbl(predictors(), ~input[[.x]])
         selection <- input$sel_method
         names(beta) <- paste0("x", 1:p)
         coefs <- tvals <- matrix(NA, nrow = reps, ncol = p)
@@ -128,6 +130,7 @@ server <- function(input, output, session) {
         colnames(cover) <- paste0("x", 1:p)
         colnames(tvals) <- paste0("x", 1:p)
         
+        # simulating model selection
         for (i in seq(reps)) {
             
             X <-  MASS::mvrnorm(n = n, rep(0, p) , Sigma)
@@ -159,21 +162,61 @@ server <- function(input, output, session) {
         
         # results dataframe ----
         df$res <- data.frame(
-            pred = paste0("x", 1:p),
-            rsq = mean(rsq),
-            mean_coef = colMeans(coefs, na.rm = TRUE),
-            cover = colMeans(cover),
-            bias = colMeans((coefs - beta), na.rm = TRUE),
-            mse = colMeans((coefs - beta)^2, na.rm = TRUE)
+            Predictor = paste0("x", 1:p),
+            R2 = mean(rsq),
+            Estimate = colMeans(coefs, na.rm = TRUE),
+            Coverage = colMeans(cover),
+            Bias = colMeans((coefs - beta), na.rm = TRUE),
+            MSE = colMeans((coefs - beta)^2, na.rm = TRUE)
             
         )
-    
-    
-    
-    # res_table ----
-    output$res_table <- renderTable({
-            df$res
+        
+        # simulating estimation from full model
+        
+        tvals_full <- matrix(NA, nrow = reps, ncol = p)
+        colnames(tvals_full) <- paste0("x", 1:p)
+        
+        for (i in seq(reps)) {
+            #print(i)
+            X <-  MASS::mvrnorm(n = n, rep(0, p) , Sigma)
+            y <- as.numeric(cbind(1, X) %*% c(b0, beta) + rnorm(n, 0, sigma_error))
+            Xy <- as.data.frame(cbind(X, y))
+            colnames(Xy) <- c(paste0("x", 1:p), "y")
+            fit <- lm(y ~ ., data = Xy)
+            s <- summary(fit)
+            tval <- s$coefficients[,3][-1]
+            tvals_full[i, names(tval)] <-  tval
+        }
+        
+        df$tvals_complete <- dplyr::bind_rows("step" =as.data.frame(tvals), 
+                                     "full" = as.data.frame(tvals_full),
+                                     .id = "model")
+
+        # res_table ----
+        output$res_table <- renderReactable({
+                reactable(df$res,
+                        defaultPageSize = 10,
+                        defaultColDef = colDef(format = colFormat(digits = 3)))
         })
-}) 
+    
+        # sim_plot ----
+        output$sim_plot <- renderPlot({
+            df$tvals_complete %>% 
+                ggplot(aes(x = x2, fill= model, color = model)) +
+                geom_density(alpha=0.6, adjust = 3) +
+                theme_minimal(12) +
+                #theme(panel.grid.minor = element_blank()) +
+                theme(panel.background = element_rect(fill = "white", colour = "grey50"),
+                      panel.grid.minor = element_blank(),
+                      legend.position = c(.8,.9)) +
+                labs(x = "t-values for Regressor X1", 
+                     y = "Density",
+                     fill = "t-values in",
+                     color = "t-values in") +
+                scale_fill_discrete(labels = c("Full model", "Predictor included in model")) + 
+                scale_color_discrete(labels = c("Full model", "Predictor included in model"))
+        })
+})
+    
 }
 shinyApp(ui, server)

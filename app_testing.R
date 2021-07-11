@@ -77,7 +77,7 @@ server <- function(input, output, session) {
     # reactive variables ----
     df <- reactiveValues()
     
-    predictors <- reactive(paste0("x", seq_len(input$n_param)))
+    predictors <- reactive(paste0("x", seq_len(input$n_pred)))
     
     output$preds <- renderUI({
         purrr::map(predictors(), ~numericInput(.x, label = paste0("True coefficient value for ", .x), 
@@ -102,11 +102,11 @@ server <- function(input, output, session) {
         }
         
         # Create a Progress object
-        progress <- shiny::Progress$new()
+        #progress <- shiny::Progress$new()
         # Make sure it closes when we exit this reactive, even if there's an error
-        on.exit(progress$close())
+        #on.exit(progress$close())
         
-        progress$set(message = "Simulating dataset", value = 0)
+        #progress$set(message = "Simulating dataset", value = 0)
         
         # simulation ----
         reps <- input$simulations
@@ -127,6 +127,9 @@ server <- function(input, output, session) {
         colnames(coefs) <- paste0("x", 1:p)
         colnames(cover) <- paste0("x", 1:p)
         colnames(tvals) <- paste0("x", 1:p)
+        
+        withProgress(message = "Running simulation", {
+            
         
         for (i in seq(reps)) {
             
@@ -153,9 +156,10 @@ server <- function(input, output, session) {
                 cover[i,names(tval)] <- ifelse(cis[names(tval),1] < beta[names(tval)] & cis[names(tval),2] > beta[names(tval)], 1, 0)
             }
             # Increment the progress bar, and update the detail text.
-            progress$inc(1/reps, detail = paste("Doing part", i))
+            incProgress(1 / input$simulations)
+            #progress$inc(1/reps, detail = paste("Doing part", i))
             
-        }
+        }})
         
         # results dataframe ----
         df$res <- data.frame(
