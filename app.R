@@ -240,4 +240,5 @@ shinyApp(ui, server)
 ## To do:
 ## Option for sampling distribution of coefficients
 ## Separate R2 from the results table
-## Diagram explaining what is happening: generate data, select a model, then compute CIs
+## Diagram explaining what is happening: generate data, select a model, then compute CIs (info tab)
+## blank table if no data is generated yet
