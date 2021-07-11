@@ -83,35 +83,17 @@ tstatval <- dplyr::bind_rows("step" =as.data.frame(tvals),
                              "full" = as.data.frame(tvals_full),
                              .id = "model")
 
-tstatval %>% 
-  ggplot(aes(x = x2, fill= model, color = model)) +
+pred <- "x2"
+  ggplot(aes(x = tstatval[[pred]], fill= model, color = model), data = tstatval) +
   geom_density(alpha=0.6, adjust = 3) +
   theme_minimal(12) +
   #theme(panel.grid.minor = element_blank()) +
   theme(panel.background = element_rect(fill = "white", colour = "grey50"),
         panel.grid.minor = element_blank(),
-        legend.position = c(.8,.9)) +
+        legend.position = "top") +
   labs(x = "t-values for Regressor X1", 
        y = "Density",
        fill = "t-values in",
        color = "t-values in") +
   scale_fill_discrete(labels = c("Full model", "Predictor included in model")) + 
   scale_color_discrete(labels = c("Full model", "Predictor included in model"))
-  
-  
-plot_models <- function(df, predictor) {
-  df %>% 
-    ggplot(aes(x = predictor, fill= model, color = model)) +
-    geom_density(alpha=0.6, adjust = 3) +
-    theme_minimal(12) +
-    #theme(panel.grid.minor = element_blank()) +
-    theme(panel.background = element_rect(fill = "white", colour = "grey50"),
-          panel.grid.minor = element_blank(),
-          legend.position = c(.8,.9)) +
-    labs(x = paste0("t-values for Regressor ", predictor), 
-         y = "Density",
-         fill = "t-values in",
-         color = "t-values in") +
-    scale_fill_discrete(labels = c("Full model", "Predictor included")) + 
-    scale_color_discrete(labels = c("Full model", "Predictor included"))
-}

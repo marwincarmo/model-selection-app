@@ -3,7 +3,7 @@ sim_tab <- tabItem(
   tabName = "sim_tab",
   fluidRow(
     column(width = 6,
-    box(title = "Parameters setting",
+    box(#title = "Parameters setting",
         width = NULL,
         solidHeader = TRUE,
         numericInput(inputId = "simulations",
@@ -31,8 +31,8 @@ sim_tab <- tabItem(
                      label = "Signal to Noise Ratio",
                      value = 0.5,
                      step = .1),
-        selectInput(inputId = "sel_method",
-                    label = "Selection method",
+        selectInput(inputId = "fit_crit",
+                    label = "Fit criterion",
                     choices = c("AIC", "BIC"),
                     ),
         actionButton("simulate", "Simulate")
@@ -53,6 +53,10 @@ sim_tab <- tabItem(
           reactableOutput("res_table"))),
     column(width = 6,
       box(width = NULL,
+          selectInput(inputId = "pred_plot",
+                      label = "Sampling distribution of regression coefficient t-values for regressor",
+                      choices = NULL,
+          ),
           plotOutput("sim_plot")))
   )
 )

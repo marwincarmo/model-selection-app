@@ -81,10 +81,12 @@ server <- function(input, output, session) {
     # input the predictors coefficients
     predictors <- reactive(paste0("x", seq_len(input$n_pred)))
     
+    # update predictors boxes
     output$preds <- renderUI({
         purrr::map(predictors(), ~numericInput(.x, label = paste0("True coefficient value for ", .x), 
                                                value = 1, step = .1))
     })
+    
     
     # simulate
     observeEvent(input$simulate, {
@@ -102,7 +104,7 @@ server <- function(input, output, session) {
             shiny::showNotification("Please choose a correlation value between -1 and 1")
             return()
         }
-        
+
         # Create a Progress object
         progress <- shiny::Progress$new()
         # Make sure it closes when we exit this reactive, even if there's an error
@@ -120,7 +122,7 @@ server <- function(input, output, session) {
         diag(Sigma) <- 1
         b0 <- input$intercept
         beta <- purrr::map_dbl(predictors(), ~input[[.x]])
-        selection <- input$sel_method
+        selection <- input$fit_crit
         names(beta) <- paste0("x", 1:p)
         coefs <- tvals <- matrix(NA, nrow = reps, ncol = p)
         cover <- matrix(0, nrow = reps, ncol = p)
@@ -188,6 +190,7 @@ server <- function(input, output, session) {
             tvals_full[i, names(tval)] <-  tval
         }
         
+        # bind estimates for the full and selected model
         df$tvals_complete <- dplyr::bind_rows("step" =as.data.frame(tvals), 
                                      "full" = as.data.frame(tvals_full),
                                      .id = "model")
@@ -195,26 +198,39 @@ server <- function(input, output, session) {
         # res_table ----
         output$res_table <- renderReactable({
                 reactable(df$res,
+                        rownames = FALSE,
                         defaultPageSize = 10,
-                        defaultColDef = colDef(format = colFormat(digits = 3)))
+                        defaultColDef = colDef(format = colFormat(digits = 3)),
+                        columns = list(
+                            Predictor = colDef(width = 75),
+                            R2 = colDef(width = 50)
+                        ))
         })
     
+        observe({
+            # update predictor choices
+            updateSelectInput(session, "pred_plot",
+                              choices = names(tval))
+        })
         # sim_plot ----
         output$sim_plot <- renderPlot({
+            
+            predictor <- input$pred_plot
+            
             df$tvals_complete %>% 
-                ggplot(aes(x = x2, fill= model, color = model)) +
+                ggplot(aes(x = df$tvals_complete[[predictor]], fill= model, color = model)) +
                 geom_density(alpha=0.6, adjust = 3) +
                 theme_minimal(12) +
                 #theme(panel.grid.minor = element_blank()) +
                 theme(panel.background = element_rect(fill = "white", colour = "grey50"),
                       panel.grid.minor = element_blank(),
-                      legend.position = c(.8,.9)) +
-                labs(x = "t-values for Regressor X1", 
+                      legend.position = "top") +
+                labs(x = paste0("t-values for Regressor ", predictor), 
                      y = "Density",
-                     fill = "t-values in",
-                     color = "t-values in") +
-                scale_fill_discrete(labels = c("Full model", "Predictor included in model")) + 
-                scale_color_discrete(labels = c("Full model", "Predictor included in model"))
+                     fill = "t-values for",
+                     color = "t-values for") +
+                scale_fill_discrete(labels = c("Full model", "Predictor in selected model")) + 
+                scale_color_discrete(labels = c("Full model", "Predictor in selected model"))
         })
 })
     
