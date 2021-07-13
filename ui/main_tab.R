@@ -51,6 +51,7 @@ sim_tab <- tabItem(
   fluidRow(
     column(width = 6,
       box(width = NULL,
+          uiOutput("rsq_output"),
           reactableOutput("res_table"))),
     column(width = 6,
       box(width = NULL,

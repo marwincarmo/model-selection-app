@@ -165,7 +165,6 @@ server <- function(input, output, session) {
         # results dataframe ----
         df$res <- data.frame(
             Predictor = paste0("x", 1:p),
-            R2 = mean(rsq),
             Estimate = colMeans(coefs, na.rm = TRUE),
             Coverage = colMeans(cover),
             Bias = colMeans((coefs - beta), na.rm = TRUE),
@@ -200,6 +199,14 @@ server <- function(input, output, session) {
         df$coefs_complete <- dplyr::bind_rows("step" =as.data.frame(coefs), 
                                               "full" = as.data.frame(coefs_full),
                                               .id = "model")
+        
+        # rsq_output ----
+        
+        output$rsq_output <- renderUI({
+            withMathJax(
+                helpText(
+                paste0("The mean \\(R^2\\) value is ", round(mean(rsq), 3))))
+        })
 
         # res_table ----
         output$res_table <- renderReactable({
@@ -239,7 +246,5 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 
 ## To do:
-## Option for sampling distribution of coefficients
-## Separate R2 from the results table
 ## Diagram explaining what is happening: generate data, select a model, then compute CIs (info tab)
 ## blank table if no data is generated yet
