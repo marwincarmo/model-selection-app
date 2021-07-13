@@ -54,8 +54,11 @@ sim_tab <- tabItem(
           reactableOutput("res_table"))),
     column(width = 6,
       box(width = NULL,
+          selectInput(inputId = "estimate_plot",
+                      label = "Sampling distribution of",
+                      choices = c("Regression coefficient", "t-values")),
           selectInput(inputId = "pred_plot",
-                      label = "Sampling distribution of regression coefficient t-values for regressor",
+                      label = "For regressor",
                       choices = NULL,
           ),
           plotOutput("sim_plot")))

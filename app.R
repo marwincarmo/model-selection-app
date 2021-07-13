@@ -175,11 +175,11 @@ server <- function(input, output, session) {
         
         # simulating estimation from full model
         
-        tvals_full <- matrix(NA, nrow = reps, ncol = p)
+        tvals_full <- coefs_full <- matrix(NA, nrow = reps, ncol = p)
         colnames(tvals_full) <- paste0("x", 1:p)
+        colnames(coefs_full) <- paste0("x", 1:p)
         
         for (i in seq(reps)) {
-            #print(i)
             X <-  MASS::mvrnorm(n = n, rep(0, p) , Sigma)
             y <- as.numeric(cbind(1, X) %*% c(b0, beta) + rnorm(n, 0, sigma_error))
             Xy <- as.data.frame(cbind(X, y))
@@ -188,12 +188,18 @@ server <- function(input, output, session) {
             s <- summary(fit)
             tval <- s$coefficients[,3][-1]
             tvals_full[i, names(tval)] <-  tval
+            coefs_full[i, names(tval)] <- coef(fit)[-1]
         }
         
         # bind estimates for the full and selected model
+        # t-values
         df$tvals_complete <- dplyr::bind_rows("step" =as.data.frame(tvals), 
                                      "full" = as.data.frame(tvals_full),
                                      .id = "model")
+        # regression coefficients
+        df$coefs_complete <- dplyr::bind_rows("step" =as.data.frame(coefs), 
+                                              "full" = as.data.frame(coefs_full),
+                                              .id = "model")
 
         # res_table ----
         output$res_table <- renderReactable({
@@ -216,21 +222,16 @@ server <- function(input, output, session) {
         output$sim_plot <- renderPlot({
             
             predictor <- input$pred_plot
+            choice <- input$estimate_plot
             
-            df$tvals_complete %>% 
-                ggplot(aes(x = df$tvals_complete[[predictor]], fill= model, color = model)) +
-                geom_density(alpha=0.6, adjust = 3) +
-                theme_minimal(12) +
-                #theme(panel.grid.minor = element_blank()) +
-                theme(panel.background = element_rect(fill = "white", colour = "grey50"),
-                      panel.grid.minor = element_blank(),
-                      legend.position = "top") +
-                labs(x = paste0("t-values for Regressor ", predictor), 
-                     y = "Density",
-                     fill = "t-values for",
-                     color = "t-values for") +
-                scale_fill_discrete(labels = c("Full model", "Predictor in selected model")) + 
-                scale_color_discrete(labels = c("Full model", "Predictor in selected model"))
+            if (choice == "Regression coefficient") {
+                estimate <- df$coefs_complete
+            } else {
+                estimate <- df$tvals_complete
+            }
+            
+            plot_pred(estimate, predictor, choice)
+            
         })
 })
     

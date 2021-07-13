@@ -1,5 +1,5 @@
 library(magrittr)
-reps <- 1
+reps <- 100
 p <- 3
 n <- 200
 # SNR can't be 0
@@ -64,8 +64,9 @@ res
 # Full model --------------------------------------------------------------
 
 
-tvals_full <- matrix(NA, nrow = reps, ncol = p)
+tvals_full <- coefs_full <- matrix(NA, nrow = reps, ncol = p)
 colnames(tvals_full) <- paste0("x", 1:p)
+colnames(coefs_full) <- paste0("x", 1:p)
 
 for (i in seq(reps)) {
   #print(i)
@@ -77,6 +78,7 @@ for (i in seq(reps)) {
   s <- summary(fit)
   tval <- s$coefficients[,3][-1]
   tvals_full[i, names(tval)] <-  tval
+  coefs_full[i, names(tval)] <- coef(fit)[-1]
 }
 
 tstatval <- dplyr::bind_rows("step" =as.data.frame(tvals), 
@@ -97,3 +99,23 @@ pred <- "x2"
        color = "t-values in") +
   scale_fill_discrete(labels = c("Full model", "Predictor included in model")) + 
   scale_color_discrete(labels = c("Full model", "Predictor included in model"))
+
+  
+plot_pred <- function(estimate, predictor, choice) {
+  ggplot(aes(x = tstatval[[predictor]], fill= model, color = model), data = estimate) +
+    geom_density(alpha=0.6, adjust = 3) +
+    theme_minimal(12) +
+    theme(panel.background = element_rect(fill = "white", colour = "grey50"),
+          panel.grid.minor = element_blank(),
+          legend.position = "top") +
+    labs(x = paste0(choice, " for Regressor ", predictor), 
+         y = "Density",
+         fill = paste0(choice, " in"),
+         color = paste0(choice, " in")) +
+    scale_fill_discrete(labels = c("Full model", "Predictor included in model")) + 
+    scale_color_discrete(labels = c("Full model", "Predictor included in model")) 
+
+}
+
+
+est <- 
