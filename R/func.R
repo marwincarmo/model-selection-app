@@ -12,7 +12,7 @@ debug_msg <- function(...) {
 
 # plot estimates for the full and selected models
 plot_pred <- function(estimate, predictor, choice) {
-  ggplot(aes(x = estimate[[predictor]], fill= model, color = model), data = estimate) +
+  ggplot(aes(x = .data[[predictor]], fill= model, color = model), data = estimate) +
     geom_density(alpha=0.6, adjust = 3) +
     theme_minimal(12) +
     theme(panel.background = element_rect(fill = "white", colour = "grey50"),

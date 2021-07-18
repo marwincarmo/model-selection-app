@@ -3,6 +3,7 @@ suppressPackageStartupMessages({
     library(shiny)
     library(shinyjs)
     library(shinydashboard)
+    library(shinyWidgets)
     library(ggplot2)
     library(dplyr)
     library(MASS)
@@ -94,6 +95,7 @@ server <- function(input, output, session) {
         # input check
         is_integer <- as.integer(input$sample_size) == input$sample_size
         is_pos <- input$sample_size >= 1
+        is_greater_zero <- input$snr > 0
         is_bounded <- (input$corr >= -1) & (input$corr <= 1)
         
         if(!is_integer || !is_pos){
@@ -102,6 +104,10 @@ server <- function(input, output, session) {
         }
         if(!is_bounded){
             shiny::showNotification("Please choose a correlation value between -1 and 1")
+            return()
+        }
+        if(!is_greater_zero){
+            shiny::showNotification("The SNR must be greater than 0!")
             return()
         }
 
@@ -247,4 +253,5 @@ shinyApp(ui, server)
 
 ## To do:
 ## Diagram explaining what is happening: generate data, select a model, then compute CIs (info tab)
+## Describe what is happening and illustrate with a flowchart
 ## blank table if no data is generated yet
