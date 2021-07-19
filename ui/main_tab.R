@@ -58,7 +58,7 @@ sim_tab <- tabItem(
       box(width = NULL,
           radioGroupButtons(inputId = "estimate_plot",
                       label = "Sampling distribution of",
-                      choices = c("Regression coefficient", "t-values"),
+                      choices = c("Parameter estimates", "t-values"),
                       justified = TRUE),
           selectInput(inputId = "pred_plot",
                       label = "For regressor",

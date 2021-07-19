@@ -3,15 +3,19 @@ library(DiagrammeR)
 DiagrammeR::grViz("digraph {
 
                   graph[layout = dot]
-                  node[shape = rectangle]
-                  A [label = '@@1']
-                  B [label = '@@2']
-                  C [label = '@@3']
+                  
+                  node[shape = rectangle,
+                      fixedsize = true,
+                      width = 1.7]
+                  
+                  A [label = '@@1', fontsize = 12]
+                  B [label = '@@2', fontsize = 12]
+                  C [label = '@@3', fontsize = 10]
                   
               A -> B -> C
               }
               
-              [1]: 'Estimate model'
-              [2]: 'Select a model'
-              [3]: 'Compute CIs'
+              [1]: 'Data generation'
+              [2]: 'Model selection'
+              [3]: 'Compute parameter estimates \\nand CIs coverage'
               ")

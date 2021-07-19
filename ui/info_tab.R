@@ -5,6 +5,8 @@ info_tab <- tabItem(
     after model selection procedures. Its purpose is to illustrate the problems 
     that arise when model selection, parameters estimation and statistical inferences 
     are undertaken with the same data set."),
+  p("The procedure works in three main steps, as shown by the diagram below:"),
+  img(src='img/flowchart.png', align = "center"),
   # p("When performing model selection, a best model is chosen for each random sample
   #   drawn. This model can be thought as an estimate of what the \"correct\" model is,
   #   and the regression parameters dependent on the model beign estimated.
@@ -29,6 +31,9 @@ info_tab <- tabItem(
   p("A mean R2 value is calculated from all estimated models."),
   p("For each specified regression coefficient the results table offer the mean
     estimate value, the confidence interval coverage, the mean bias and mean squared error."),
+  p("Plots for the sampling distributions of t-values and parameter estimates
+    are provided for each regressor. These are compared against the theoretical distribution of n samples
+    where no model selection procedure is performed."),
   h2("References"),
   p("Berk, R., Brown, L., & Zhao, L. (2010). Statistical Inference After Model Selection. 
     Journal of Quantitative Criminology, 26(2), 217-236. https://doi.org/10.1007/s10940-009-9077-7
