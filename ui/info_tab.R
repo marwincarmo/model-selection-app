@@ -23,6 +23,7 @@ info_tab <- tabItem(
     This term equals the mean divided by the standard deviation."),
   h3("Step 2: Model Selection"),
   h3("Step 3: Computing the results"),
+  p(""),
   h2("References"),
   p("Berk, R., Brown, L., & Zhao, L. (2010). Statistical Inference After Model Selection. 
     Journal of Quantitative Criminology, 26(2), 217-236. https://doi.org/10.1007/s10940-009-9077-7
