@@ -5,10 +5,10 @@ info_tab <- tabItem(
     after model selection procedures. Its purpose is to illustrate the problems 
     that arise when model selection, parameters estimation and statistical inferences 
     are undertaken with the same data set."),
-  p("When performing model selection, a best model is chosen for each random sample
-    drawn. This model can be thought as an estimate of what the \"correct\" model is,
-    and the regression parameters dependent on the model beign estimated.
-    The parameters estimates distribution will, therefore, contain estimates"),
+  # p("When performing model selection, a best model is chosen for each random sample
+  #   drawn. This model can be thought as an estimate of what the \"correct\" model is,
+  #   and the regression parameters dependent on the model beign estimated.
+  #   The parameters estimates distribution will, therefore, contain estimates"),
   h3("Step 1: Generate the data"),
   p("First the correct regression model must be specified. The user can choose the number
     of predictors included and its respective parameter values. By default, each 
