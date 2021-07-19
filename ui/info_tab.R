@@ -14,16 +14,21 @@ info_tab <- tabItem(
     of predictors included and its respective parameter values. By default, each 
     parameter is set to 1, but new values can be set individually.
     Note that the more predictors included, the longer it will take to run each simulation."),
-  p("An intercept value of 1 is also set by default. Although this value can be changed, 
+  p("An intercept value of 1 is also set by default. Although this value can be modified, 
     the output will only provide estimates for predictors."),
   p("The predictors are drawn at random from a multivariate normal distribution.
     The correlation matrix is set with 1's on diagonal and the
     correlation value on the off-diagonal."),
   p("The error term variability is expressed in terms of the signal-to-noise-ratio (SNR).
     This term equals the mean divided by the standard deviation."),
+  #p("Finally set a number of simulations to be run"),
   h3("Step 2: Model Selection"),
-  h3("Step 3: Computing the results"),
-  p(""),
+  p("Foward stepwise regression is applied to each sample simulated. Model selection
+    will be performed with the preferred procedure (AIC or BIC)."),
+  h3("Step 3: Results"),
+  p("A mean R2 value is calculated from all estimated models."),
+  p("For each specified regression coefficient the results table offer the mean
+    estimate value, the confidence interval coverage, the mean bias and mean squared error."),
   h2("References"),
   p("Berk, R., Brown, L., & Zhao, L. (2010). Statistical Inference After Model Selection. 
     Journal of Quantitative Criminology, 26(2), 217-236. https://doi.org/10.1007/s10940-009-9077-7
