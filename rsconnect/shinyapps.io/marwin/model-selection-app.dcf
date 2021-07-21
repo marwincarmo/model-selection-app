@@ -5,10 +5,10 @@ account: marwin
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4375029
-bundleId: 4813139
+bundleId: 4839621
 url: https://marwin.shinyapps.io/model-selection-app/
-when: 1626136205.49582
-lastSyncTime: 1626136205.49582
+when: 1626826718.0662
+lastSyncTime: 1626826718.0662
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: app_testing.R|tests.R
+ignoredFiles: app_testing.R|tests.R|www/img/Rplot.png
