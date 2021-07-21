@@ -124,7 +124,7 @@ server <- function(input, output, session) {
         b0 <- input$intercept
         beta <- purrr::map_dbl(predictors(), ~input[[.x]])
         selection <- input$fit_crit
-        names(beta) <- paste0("x", 1:p)
+        names(beta) <- paste0("X", 1:p)
         coefs <- tvals <- matrix(NA, nrow = reps, ncol = p)
         cover <- matrix(0, nrow = reps, ncol = p)
         rsq <- NULL
