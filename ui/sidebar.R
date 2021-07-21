@@ -9,6 +9,7 @@ sidebar <- dashboardSidebar(
              icon = icon("home"),
              startExpanded = TRUE),
     menuItem("Info", tabName = "info_tab",
-             icon = icon("info"))
+             icon = icon("info")),
+    menuItem("App Code on Github", href = "https://github.com/marwincarmo/model-selection-app", icon = icon("github"))
   )
 )

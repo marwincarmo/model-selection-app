@@ -45,19 +45,9 @@ source("ui/info_tab.R")
 
 ## UI ----
 ui <- dashboardPage(
-    skin = "purple",
+    skin = "blue",
     dashboardHeader(title = "Model selection simulation"),
     sidebar = sidebar, # if sourced above
-    #dashboardSidebar(
-        # https://fontawesome.com/icons?d=gallery&m=free
-    #    sidebarMenu(
-    #        id = "tabs",
-    #        menuItem("Main", tabName = "main_tab",
-    #                 icon = icon("home")),
-    #        menuItem("Info", tabName = "info_tab",
-    #                 icon = icon("info"))
-        
-    
     dashboardBody(
         shinyjs::useShinyjs(),
         tags$head(
@@ -96,18 +86,23 @@ server <- function(input, output, session) {
         is_integer <- as.integer(input$sample_size) == input$sample_size
         is_pos <- input$sample_size >= 1
         is_greater_zero <- input$snr > 0
+        non_zero_pred <- input$n_pred > 0
         is_bounded <- (input$corr >= -1) & (input$corr <= 1)
         
         if(!is_integer || !is_pos){
-            shiny::showNotification("Please fix sample size value. Choose a whole number greater than zero")
+            shiny::showNotification("Please fix sample size value. Choose a whole number greater than zero.")
             return()
         }
         if(!is_bounded){
-            shiny::showNotification("Please choose a correlation value between -1 and 1")
+            shiny::showNotification("Please choose a correlation value between -1 and 1.")
             return()
         }
         if(!is_greater_zero){
             shiny::showNotification("The SNR must be greater than 0!")
+            return()
+        }
+        if(!non_zero_pred){
+            shiny::showNotification("Number of predictors must be greater than zero.")
             return()
         }
 
@@ -116,7 +111,7 @@ server <- function(input, output, session) {
         # Make sure it closes when we exit this reactive, even if there's an error
         on.exit(progress$close())
         
-        progress$set(message = "Simulating dataset", value = 0)
+        progress$set(message = "Simulating datasets", value = 0)
         
         # simulation ----
         reps <- input$simulations
@@ -134,9 +129,9 @@ server <- function(input, output, session) {
         cover <- matrix(0, nrow = reps, ncol = p)
         rsq <- NULL
         sigma_error <-  sqrt(as.numeric(crossprod(beta, Sigma %*% beta) / SNR))
-        colnames(coefs) <- paste0("x", 1:p)
-        colnames(cover) <- paste0("x", 1:p)
-        colnames(tvals) <- paste0("x", 1:p)
+        colnames(coefs) <- paste0("X", 1:p)
+        colnames(cover) <- paste0("X", 1:p)
+        colnames(tvals) <- paste0("X", 1:p)
         
         # simulating model selection
         for (i in seq(reps)) {
@@ -144,7 +139,7 @@ server <- function(input, output, session) {
             X <-  MASS::mvrnorm(n = n, rep(0, p) , Sigma)
             y <- as.numeric(cbind(1, X) %*% c(b0, beta) + rnorm(n, 0, sigma_error))
             Xy <- as.data.frame(cbind(X, y))
-            colnames(Xy) <- c(paste0("x", 1:p), "y")
+            colnames(Xy) <- c(paste0("X", 1:p), "y")
             fit <- lm(y ~ ., data = Xy)
             if (selection == "AIC") {
                 sel <- step(fit, k = 2, trace = FALSE)
@@ -170,7 +165,7 @@ server <- function(input, output, session) {
         
         # results dataframe ----
         df$res <- data.frame(
-            Predictor = paste0("x", 1:p),
+            Predictor = paste0("X", 1:p),
             Estimate = colMeans(coefs, na.rm = TRUE),
             Coverage = colMeans(cover),
             Bias = colMeans((coefs - beta), na.rm = TRUE),
@@ -181,14 +176,14 @@ server <- function(input, output, session) {
         # simulating estimation from full model
         
         tvals_full <- coefs_full <- matrix(NA, nrow = reps, ncol = p)
-        colnames(tvals_full) <- paste0("x", 1:p)
-        colnames(coefs_full) <- paste0("x", 1:p)
+        colnames(tvals_full) <- paste0("X", 1:p)
+        colnames(coefs_full) <- paste0("X", 1:p)
         
         for (i in seq(reps)) {
             X <-  MASS::mvrnorm(n = n, rep(0, p) , Sigma)
             y <- as.numeric(cbind(1, X) %*% c(b0, beta) + rnorm(n, 0, sigma_error))
             Xy <- as.data.frame(cbind(X, y))
-            colnames(Xy) <- c(paste0("x", 1:p), "y")
+            colnames(Xy) <- c(paste0("X", 1:p), "y")
             fit <- lm(y ~ ., data = Xy)
             s <- summary(fit)
             tval <- s$coefficients[,3][-1]
