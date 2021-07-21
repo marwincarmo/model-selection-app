@@ -9,12 +9,12 @@ info_tab <- tabItem(
     that arise when model selection, parameters estimation and statistical inferences 
     are undertaken with the same data set."),
     p("The procedure works in three main steps, as shown by the diagram below:"),
-    img(src='img/flowchart.png', align = "center"),
+    img(src='img/flowchart2.png', align = "center"),
     # p("When performing model selection, a best model is chosen for each random sample
     #   drawn. This model can be thought as an estimate of what the \"correct\" model is,
     #   and the regression parameters dependent on the model beign estimated.
     #   The parameters estimates distribution will, therefore, contain estimates"),
-    h3("Step 1: Generate the data"),
+    h3("Step 1: Generate data"),
     p("First the preferred regression model must be specified. The user can choose the number
     of predictors included and its respective parameter values. By default, each 
     parameter is set to 1, but new values can be set individually.
@@ -27,7 +27,7 @@ info_tab <- tabItem(
     p("The error term variability is expressed in terms of the signal-to-noise-ratio (SNR).
     This term equals the mean divided by the standard deviation."),
     #p("Finally set a number of simulations to be run"),
-    h3("Step 2: Model Selection"),
+    h3("Step 2: Select a model"),
     p("Foward stepwise regression is applied to each sample simulated. Model selection
     will be performed with the preferred procedure (AIC or BIC)."),
     h3("Step 3: Results"),

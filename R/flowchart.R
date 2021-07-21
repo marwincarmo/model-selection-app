@@ -15,7 +15,7 @@ DiagrammeR::grViz("digraph {
               A -> B -> C
               }
               
-              [1]: 'Data generation'
-              [2]: 'Model selection'
+              [1]: 'Generate data'
+              [2]: 'Select a model'
               [3]: 'Compute parameter estimates \\nand CIs coverage'
               ")
