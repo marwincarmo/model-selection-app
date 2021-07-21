@@ -1,5 +1,5 @@
 sidebar <- dashboardSidebar(
-  collapsed = TRUE,
+  collapsed = FALSE,
   # https://fontawesome.com/icons?d=gallery&m=free
   sidebarMenu(
     id = "tabs",
