@@ -232,7 +232,7 @@ server <- function(input, output, session) {
             predictor <- input$pred_plot
             choice <- input$estimate_plot
             
-            if (choice == "Regression coefficient") {
+            if (choice == "Parameter estimates") {
                 estimate <- df$coefs_complete
             } else {
                 estimate <- df$tvals_complete
