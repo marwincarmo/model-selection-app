@@ -43,7 +43,11 @@ Plots for the sampling distributions of t-values and parameter estimates are pro
 </center>
 
 
-
 # References
 
 Berk, R., Brown, L., & Zhao, L. (2010). Statistical Inference After Model Selection. Journal of Quantitative Criminology, 26(2), 217-236. https://doi.org/10.1007/s10940-009-9077-7
+
+Bias of an estimator. (2021, May 6). In Wikipedia. https://en.wikipedia.org/wiki/Bias_of_an_estimator
+
+
+Lohninger, H. (n.d.). Signal and Noise. Fundamentals of Statistics. Retrieved August 2, 2021, from http://www.statistics4u.com/fundstat_eng/cc_signal_noise.html
