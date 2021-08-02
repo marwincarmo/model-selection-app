@@ -49,5 +49,4 @@ Berk, R., Brown, L., & Zhao, L. (2010). Statistical Inference After Model Select
 
 Bias of an estimator. (2021, May 6). In Wikipedia. https://en.wikipedia.org/wiki/Bias_of_an_estimator
 
-
 Lohninger, H. (n.d.). Signal and Noise. Fundamentals of Statistics. Retrieved August 2, 2021, from http://www.statistics4u.com/fundstat_eng/cc_signal_noise.html

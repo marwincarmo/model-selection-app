@@ -9,6 +9,7 @@ suppressPackageStartupMessages({
     library(MASS)
     library(purrr)
     library(reactable)
+    library(rmarkdown)
 })
 
 ## Functions ----
