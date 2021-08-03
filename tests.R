@@ -15,8 +15,11 @@ names(beta) <- paste0("x", 1:p)
 coefs <- tvals <- matrix(NA, nrow = reps, ncol = p)
 cover <- matrix(0, nrow = reps, ncol = p)
 rsq <- NULL
-sigma_error <- 10
-#sigma_error <-  sqrt(as.numeric(crossprod(beta, Sigma %*% beta) / SNR))
+#sigma_error <- 10
+sigma_error <-  sqrt(as.numeric(crossprod(beta, Sigma %*% beta) / SNR))
+# to
+SNR <- as.numeric(crossprod(beta, Sigma %*% beta)*(sigma_error^(-2)))
+
 colnames(coefs) <- paste0("x", 1:p)
 colnames(cover) <- paste0("x", 1:p)
 colnames(tvals) <- paste0("x", 1:p)

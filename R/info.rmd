@@ -1,6 +1,11 @@
+---
+title: "About"
+output: html_document
+---
+
 # Using the app
 
-This Shiny app is designed for performing simuations of statistical inferences after model selection procedures. Its purpose is to illustrate the problems that arise when model selection, parameters estimation and statistical inferences are undertaken with the same data set.
+This Shiny app is designed for performing simulations of statistical inferences after model selection procedures. Its purpose is to illustrate the problems that arise when model selection, parameters estimation and statistical inferences are undertaken with the same data set.
 
 The procedure works in three main steps, as shown by the diagram below:
 
@@ -20,11 +25,12 @@ An intercept value of 1 is also set by default. Although it can be modified, the
 
 The predictors are drawn at random from a multivariate normal distribution. The variance-covariance matrix is set with 1's on diagonal and the covariance values on the off-diagonal.
 
-The error term variability is expressed in terms of the signal-to-noise-ratio (SNR). This term equals the mean divided by the standard deviation.
+The error term variability is expressed in terms of the signal-to-noise-ratio (SNR). This term is defined as:
 
-<center>
-<img src="https://latex.codecogs.com/gif.latex?SNR&space;=&space;\frac{\mu}{\sigma}">
-</center>
+$$SNR = \textbf{b}\Sigma\textbf{b}\sigma^{-2}$$
+Where,
+$\textbf{b}$ is a (*p* + 1) x 1 vector of regression coefficients, $\Sigma$ is the covariance matrix of the predictors and $\sigma^2$ is the error term variance.
+
 
 ## Step 2: Select a model
 
@@ -36,17 +42,18 @@ A mean R<sup>2</sup> value is calculated from all estimated models.
 
 For each specified regression coefficient the results table offer the mean estimate value, the confidence interval coverage, the mean bias and mean squared error.
 
+$$
+\begin{align*}
+bias(\hat{\theta})&= \mathbf{E}(\theta)-\theta \\\\
+MSE(\hat{\theta})&= \mathbf{E}[(\hat{\theta}-\theta)^2]
+\end{align*}
+$$
+
 Plots for the sampling distributions of t-values and parameter estimates are provided for each regressor. These are compared against the theoretical distribution of n samples where no model selection procedure is performed.
-
-<center>
-<img src="https://latex.codecogs.com/gif.latex?\begin{align*}&space;bias(\hat{\theta})&space;=&space;\mathbf{E}(\theta)&space;-&space;\theta\\&space;MSE(\hat{\theta})&space;=&space;\mathbf{E}[(\hat{\theta}&space;-&space;\theta)^2]&space;\end{align*}">
-</center>
-
 
 # References
 
 Berk, R., Brown, L., & Zhao, L. (2010). Statistical Inference After Model Selection. Journal of Quantitative Criminology, 26(2), 217-236. https://doi.org/10.1007/s10940-009-9077-7
 
-Bias of an estimator. (2021, May 6). In Wikipedia. https://en.wikipedia.org/wiki/Bias_of_an_estimator
-
 Lohninger, H. (n.d.). Signal and Noise. Fundamentals of Statistics. Retrieved August 2, 2021, from http://www.statistics4u.com/fundstat_eng/cc_signal_noise.html
+

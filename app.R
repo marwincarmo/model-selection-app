@@ -34,7 +34,7 @@ debug_msg <- function(...) {
 
 source("ui/sidebar.R")
 source("ui/main_tab.R")
-source("ui/info_tab2.R")
+source("ui/info_tab.R")
 
 
 

@@ -41,6 +41,8 @@ sim_tab <- tabItem(
             actionButton("simulate", "Simulate"))),
     column(width = 6,
             box(width = NULL,
+                title = "",
+                solidHeader = TRUE,
                 status = "primary",
                 collapsible = TRUE,
                 numericInput(inputId = "n_pred",
