@@ -40,7 +40,7 @@ Foward stepwise regression is applied to each sample simulated. Model selection 
 
 A mean R<sup>2</sup> value is calculated from all estimated models.
 
-For each specified regression coefficient the results table offer the mean estimate value, the confidence interval coverage, the mean bias and mean squared error.
+For each specified regression coefficient the results table offer the average estimate value, the confidence interval coverage, the average bias and average mean squared error.
 
 $$
 \begin{align*}
