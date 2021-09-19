@@ -248,6 +248,7 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 
 ## To do:
-## Diagram explaining what is happening: generate data, select a model, then compute CIs (info tab)
-## Describe what is happening and illustrate with a flowchart
 ## blank table if no data is generated yet
+## correlation matrix
+## remake plot
+## hold coefficient values
