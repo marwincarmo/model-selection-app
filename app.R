@@ -10,6 +10,7 @@ suppressPackageStartupMessages({
     library(purrr)
     library(reactable)
     library(rmarkdown)
+    library(markdown)
 })
 
 ## Functions ----
@@ -252,3 +253,4 @@ shinyApp(ui, server)
 ## correlation matrix
 ## remake plot
 ## hold coefficient values
+## download results button
