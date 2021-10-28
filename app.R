@@ -79,8 +79,8 @@ server <- function(input, output, session) {
         purrr::map(predictors(), ~numericInput(.x, label = paste0("True coefficient value for ", .x), 
                                                value = 1, step = .1))
     })
-    
-    
+
+
     # simulate
     observeEvent(input$simulate, {
         debug_msg("simulate", input$simulate)
@@ -92,7 +92,7 @@ server <- function(input, output, session) {
         is_bounded <- (input$corr >= -1) & (input$corr <= 1)
         
         if(!is_integer || !is_pos){
-            shiny::showNotification("Please fix sample size value. Choose a whole number greater than zero.")
+            shiny::showNotification("Please fix sample size value. Choose an integer greater than zero.")
             return()
         }
         if(!is_bounded){
@@ -175,7 +175,7 @@ server <- function(input, output, session) {
             
         )
         
-        # simulating estimation from full model
+        # simulating estimates from full model
         
         tvals_full <- coefs_full <- matrix(NA, nrow = reps, ncol = p)
         colnames(tvals_full) <- paste0("X", 1:p)
@@ -254,3 +254,4 @@ shinyApp(ui, server)
 ## remake plot
 ## hold coefficient values
 ## download results button
+## interactions
