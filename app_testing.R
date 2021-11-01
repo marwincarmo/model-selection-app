@@ -84,6 +84,26 @@ server <- function(input, output, session) {
         }
     })
     
+    observeEvent(input$mudar, {
+        
+        # atualizar valores guardados
+        for (ii in seq_along(names(valor_guardado))) {
+            nm <- paste0("x", ii)
+            valor_guardado[[nm]] <- runif(1)
+            # atualiza o numeric input
+            updateNumericInput(
+                session,
+                paste0("x", ii),
+                #sort(names(valor_guardado))[ii],
+                paste0("True coefficient value for x", ii),
+                valor_guardado[[nm]], 0, 1
+            )
+        }
+        
+    })
+    
+    
+    
     
     # update predictors boxes
     #output$preds <- renderUI({
@@ -104,12 +124,12 @@ server <- function(input, output, session) {
             nm <- paste0("x", .x)
             # se o valor não existe, ele cria e coloca esse valor no reactive values
             if (is.null(valor_guardado[[nm]])) {
-                valor_guardado[[nm]] <- runif(1)
+                valor_guardado[[nm]] <- 1
             }
             
             shiny::numericInput(
                 nm, 
-                paste("Input", .x), 
+                paste0("True coefficient value for x", .x), 
                 valor_guardado[[nm]],
                 step = .1
             )

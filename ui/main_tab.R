@@ -41,16 +41,6 @@ sim_tab <- tabItem(
             actionButton("simulate", "Simulate"))),
     column(width = 6,
            box(width = NULL,
-               title = "Results",
-               solidHeader = TRUE,
-               status = "primary",
-               uiOutput("rsq_output"),
-               reactableOutput("res_table"))
-            )
-    ),
-  fluidRow(
-    column(width = 6,
-           box(width = NULL,
                title = "",
                solidHeader = TRUE,
                status = "primary",
@@ -59,8 +49,20 @@ sim_tab <- tabItem(
                             label = "Number of predictors",
                             value = 1,
                             min = 1),
+               shiny::actionButton("randval", "Generate random values"),
                uiOutput("preds")
-           )),
+           )
+            )
+    ),
+  fluidRow(
+    column(width = 6,
+           box(width = NULL,
+               title = "Results",
+               solidHeader = TRUE,
+               status = "primary",
+               uiOutput("rsq_output"),
+               reactableOutput("res_table"))
+           ),
     column(width = 6,
       box(width = NULL,
           title = "Sampling distribution",

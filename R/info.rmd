@@ -27,7 +27,7 @@ The predictors are drawn at random from a multivariate normal distribution. The 
 
 The error term variability is expressed in terms of the signal-to-noise-ratio (SNR). This term is defined as:
 
-$$SNR = \textbf{b}\Sigma\textbf{b}\sigma^{-2}$$
+$$\frac{S}{N} = \textbf{b}\Sigma\textbf{b}\sigma^{-2}$$
 Where,
 $\textbf{b}$ is a (*p* + 1) x 1 vector of regression coefficients, $\Sigma$ is the covariance matrix of the predictors and $\sigma^2$ is the error term variance.
 

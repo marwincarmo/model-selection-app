@@ -71,15 +71,62 @@ server <- function(input, output, session) {
     # reactive variables ----
     df <- reactiveValues()
     
+    stored_values <- reactiveValues()
+    
     # input the predictors coefficients
     predictors <- reactive(paste0("x", seq_len(input$n_pred)))
     
-    # update predictors boxes
-    output$preds <- renderUI({
-        purrr::map(predictors(), ~numericInput(.x, label = paste0("True coefficient value for ", .x), 
-                                               value = 1, step = .1))
+    # update input with randomly generated values
+    observeEvent(input$randval, {
+        
+        # update stored values
+        for (ii in seq_along(names(stored_values))) {
+            nm <- paste0("x", ii)
+            stored_values[[nm]] <- runif(1)
+            # update numeric input
+            updateNumericInput(
+                session,
+                paste0("x", ii),
+                paste0("True coefficient value for x", ii),
+                stored_values[[nm]], 0, 1
+            )
+        }
+        
     })
+    
+    observe({
+        ids <- seq_len(input$n_pred)
+        for (ii in ids) {
+            nm <- paste0("x", ii)
+            stored_values[[nm]] <- input[[nm]]
+        }
+    })
+    
+    
+    output$preds <- shiny::renderUI({
+        
+        lista <- purrr::map(seq_len(input$n_pred), ~{
+            
+            # this function will keep the previous values when
+            # the number of inputs is changed
 
+            nm <- paste0("x", .x)
+            # if the value doesn't exists, one is created and stored in the reactiveValues object
+            if (is.null(stored_values[[nm]])) {
+                stored_values[[nm]] <- 1
+            }
+            
+            shiny::numericInput(
+                nm, 
+                paste0("True coefficient value for x", .x), 
+                stored_values[[nm]],
+                step = .1
+            )
+        })
+        
+        lista
+    })
+    
 
     # simulate
     observeEvent(input$simulate, {
@@ -252,6 +299,5 @@ shinyApp(ui, server)
 ## blank table if no data is generated yet
 ## correlation matrix
 ## remake plot
-## hold coefficient values
 ## download results button
 ## interactions
