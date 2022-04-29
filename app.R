@@ -1,3 +1,5 @@
+## Shiny template by @LisaDeBruine -- https://github.com/PsyTeachR/shiny-tutorials
+
 ## libraries ----
 suppressPackageStartupMessages({
     library(shiny)
@@ -15,8 +17,6 @@ suppressPackageStartupMessages({
 
 ## Functions ----
 
-# source("R/func.R") # put long functions in external files
-
 # display debugging messages in R if local, 
 # or in the console log if remote
 debug_msg <- function(...) {
@@ -31,18 +31,9 @@ debug_msg <- function(...) {
 
 ## Tabs ----
 
-# you can put complex tabs in separate files and source them
-
 source("ui/sidebar.R")
 source("ui/main_tab.R")
 source("ui/info_tab.R")
-
-
-
-# if the header and/or sidebar get too complex, 
-# put them in external files and uncomment below 
-# source("ui/header.R") # defines the `header`
-# source("ui/sidebar.R") # defines the `sidebar`
 
 
 ## UI ----
@@ -73,10 +64,11 @@ server <- function(input, output, session) {
     
     stored_values <- reactiveValues()
     
-    # input the predictors coefficients
+    # set the fields to input the predictors coefficients values
     predictors <- reactive(paste0("x", seq_len(input$n_pred)))
     
-    # update input with randomly generated values
+    # randomly generated values predictors coefficients values
+    # (Huge thanks to Julio Trecenti for helping me with the code for this feature)
     observeEvent(input$randval, {
         
         # update stored values
@@ -105,13 +97,14 @@ server <- function(input, output, session) {
     
     output$preds <- shiny::renderUI({
         
-        lista <- purrr::map(seq_len(input$n_pred), ~{
+        randList <- purrr::map(seq_len(input$n_pred), ~{
             
             # this function will keep the previous values when
             # the number of inputs is changed
 
             nm <- paste0("x", .x)
             # if the value doesn't exists, one is created and stored in the reactiveValues object
+            # i.e. newly added predictors always start with value of 1
             if (is.null(stored_values[[nm]])) {
                 stored_values[[nm]] <- 1
             }
@@ -124,14 +117,14 @@ server <- function(input, output, session) {
             )
         })
         
-        lista
+        randList
     })
     
 
     # simulate
     observeEvent(input$simulate, {
         debug_msg("simulate", input$simulate)
-        # input check
+        # input checks
         is_integer <- as.integer(input$sample_size) == input$sample_size
         is_pos <- input$sample_size >= 1
         is_greater_zero <- input$snr > 0
@@ -173,14 +166,14 @@ server <- function(input, output, session) {
         b0 <- input$intercept
         beta <- purrr::map_dbl(predictors(), ~input[[.x]])
         selection <- input$fit_crit
-        names(beta) <- paste0("X", 1:p)
+        names(beta) <- paste0("x", 1:p)
         coefs <- tvals <- matrix(NA, nrow = reps, ncol = p)
         cover <- matrix(0, nrow = reps, ncol = p)
         rsq <- NULL
         sigma_error <-  sqrt(as.numeric(crossprod(beta, Sigma %*% beta) / SNR))
-        colnames(coefs) <- paste0("X", 1:p)
-        colnames(cover) <- paste0("X", 1:p)
-        colnames(tvals) <- paste0("X", 1:p)
+        colnames(coefs) <- paste0("x", 1:p)
+        colnames(cover) <- paste0("x", 1:p)
+        colnames(tvals) <- paste0("x", 1:p)
         
         # simulating model selection
         for (i in seq(reps)) {
@@ -188,7 +181,7 @@ server <- function(input, output, session) {
             X <-  MASS::mvrnorm(n = n, rep(0, p) , Sigma)
             y <- as.numeric(cbind(1, X) %*% c(b0, beta) + rnorm(n, 0, sigma_error))
             Xy <- as.data.frame(cbind(X, y))
-            colnames(Xy) <- c(paste0("X", 1:p), "y")
+            colnames(Xy) <- c(paste0("x", 1:p), "y")
             fit <- lm(y ~ ., data = Xy)
             if (selection == "AIC") {
                 sel <- step(fit, k = 2, trace = FALSE)
@@ -201,20 +194,22 @@ server <- function(input, output, session) {
             coefs[i, names(tval)] <- coef(sel)[-1]
             cis <- confint(sel)[-1,]
             rsq[i] <- s$r.squared
-            # avoids error if there is only one predictor selected
+            # prevents failure if there is only one predictor selected
             if (length(cis) < 3) {
-                cover[i,names(tval)] <- ifelse(cis[1] < beta[names(tval)] & cis[2] > beta[names(tval)], 1, 0)
+                cover[i,names(tval)] <- ifelse(cis[1] < beta[names(tval)] & 
+                                                 cis[2] > beta[names(tval)], 1, 0)
             } else {
-                cover[i,names(tval)] <- ifelse(cis[names(tval),1] < beta[names(tval)] & cis[names(tval),2] > beta[names(tval)], 1, 0)
+                cover[i,names(tval)] <- ifelse(cis[names(tval),1] < beta[names(tval)] & 
+                                                 cis[names(tval),2] > beta[names(tval)], 1, 0)
             }
-            # Increment the progress bar, and update the detail text.
+            # Increment the progress bar
             progress$inc(1/reps, detail = paste("Doing part", i))
             
         }
         
         # results dataframe ----
         df$res <- data.frame(
-            Predictor = paste0("X", 1:p),
+            Predictor = paste0("x", 1:p),
             Estimate = colMeans(coefs, na.rm = TRUE),
             Coverage = colMeans(cover),
             Bias = colMeans((coefs - beta), na.rm = TRUE),
@@ -225,14 +220,14 @@ server <- function(input, output, session) {
         # simulating estimates from full model
         
         tvals_full <- coefs_full <- matrix(NA, nrow = reps, ncol = p)
-        colnames(tvals_full) <- paste0("X", 1:p)
-        colnames(coefs_full) <- paste0("X", 1:p)
+        colnames(tvals_full) <- paste0("x", 1:p)
+        colnames(coefs_full) <- paste0("x", 1:p)
         
         for (i in seq(reps)) {
             X <-  MASS::mvrnorm(n = n, rep(0, p) , Sigma)
             y <- as.numeric(cbind(1, X) %*% c(b0, beta) + rnorm(n, 0, sigma_error))
             Xy <- as.data.frame(cbind(X, y))
-            colnames(Xy) <- c(paste0("X", 1:p), "y")
+            colnames(Xy) <- c(paste0("x", 1:p), "y")
             fit <- lm(y ~ ., data = Xy)
             s <- summary(fit)
             tval <- s$coefficients[,3][-1]

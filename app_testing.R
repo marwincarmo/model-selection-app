@@ -72,6 +72,8 @@ server <- function(input, output, session) {
     df <- reactiveValues()
     
     # input the predictors coefficients
+    # Special thanks to Julio Trecenti (@jtrecenti) for figuring out how to
+    # set up this part
     predictors <- reactive(paste0("x", seq_len(input$n_pred)))
     
     valor_guardado <- reactiveValues()
