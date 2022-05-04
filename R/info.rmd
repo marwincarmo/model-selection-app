@@ -5,27 +5,47 @@ output: html_document
 
 # Using the app
 
-This Shiny app is designed for performing simulations of statistical inferences after model selection procedures. Its purpose is to illustrate the problems that arise when model selection, parameters estimation and statistical inferences are undertaken with the same data set.
+This Shiny app is designed for performing simulations of statistical inferences after model selection procedures. Its purpose is to illustrate the problems that arise when model selection, parameters estimation and statistical inferences are undertaken with the same data set. The rationale behind it can be found at https://marwincarmo.github.io/posts/2021-12-20-model-selection-bias/
 
 The procedure works in three main steps, as shown by the diagram below:
 
 <center>
 
 ---
-<img src="img/flowchart2.png";"/>
+<img src="img/flowdiagram.png";"/>
 ---
 
 </center>
 
 ## Step 1: Generate data
 
-First the preferred regression model must be specified. The user can choose the number of predictors included and its respective parameter values. By default each parameter is set to 1 but new values can be set individually. Note that the more predictors included, the longer it will take to run each simulation.
+First the preferred regression model must be specified. The user can choose the number of predictors included and their coefficient values. By default each parameter is set to 1 but new values can be set individually. The "Generate Random Values" button will assign random values between 0 and 1 to all predictors included. Note that with more predictors included, the longer it will take to run the simulations. Also, since this application is hosted in a free shinyapps.io server, there is a memory cap that might suspend simulations with high computational usage before they are completed. Therefore, it is advised to fork this app and run it locally in your environment if you wish to use a higher number of predictors (i.e. more than 10).
 
 An intercept value of 1 is also set by default. Although it can be modified, the output will only provide estimates for predictors.
 
-The predictors are drawn at random from a multivariate normal distribution. The variance-covariance matrix is set with 1's on diagonal and the covariance values on the off-diagonal.
+The predictors are drawn at random from a multivariate normal distribution. Set the correlation matrix by specifying the entries on the off diagonal separated by commas. By default, if you leave it blank, a correlation of 0.5 will be set between every predictor on the model. Please, consider the code below to see how it works in a setting with 4 predictors:
 
-The error term variability is expressed in terms of the signal-to-noise-ratio (SNR). This term is defined as:
+```{r}
+p <- 4
+cormatrix <- c("0.1, 0.5, 0.3, 0.1, 0.7, 0.4")
+cormat <- ifelse(cormatrix == "", "0.5", cormatrix)
+corvals <- as.numeric(unlist(strsplit(cormat,",")))
+Sigma <- matrix(rep(0,p*p), nrow=p)
+Sigma[lower.tri(Sigma)] <-  corvals
+Sigma <- t(Sigma)
+Sigma[lower.tri(Sigma)] <-  corvals
+diag(Sigma) <- 1
+
+# > Sigma
+#      [,1] [,2] [,3] [,4]
+# [1,]  1.0  0.1  0.5  0.3
+# [2,]  0.1  1.0  0.1  0.7
+# [3,]  0.5  0.1  1.0  0.4
+# [4,]  0.3  0.7  0.4  1.0
+```
+
+
+The error term variability is expressed in terms of the signal-to-noise ratio (SNR). This term is defined here as:
 
 $$\frac{S}{N} = \textbf{b}\Sigma\textbf{b}\sigma^{-2}$$
 Where,
@@ -34,25 +54,31 @@ $\textbf{b}$ is a (*p* + 1) x 1 vector of regression coefficients, $\Sigma$ is t
 
 ## Step 2: Select a model
 
-Foward stepwise regression is applied to each sample simulated. Model selection will be performed with the preferred procedure (AIC or BIC).
+Forward stepwise variable selection is applied to each sample simulated. Model selection will be performed with the preferred procedure (AIC, BIC or Mallow's Cp).
 
 ## Step 3: Results
 
 A mean R<sup>2</sup> value is calculated from all estimated models.
 
-For each specified regression coefficient the results table offer the average estimate value, the confidence interval coverage, the average bias and average mean squared error.
+For each specified regression coefficient, the results table offer the average estimate value, its 95% Confidence Interval coverage, the average bias and the average mean squared error.
 
 $$
 \begin{align*}
-bias(\hat{\theta})&= \mathbf{E}(\theta)-\theta \\\\
+bias(\hat{\theta})&= \mathbf{E}_{x|\theta}[\hat{\theta}-\theta] \\\\
 MSE(\hat{\theta})&= \mathbf{E}[(\hat{\theta}-\theta)^2]
 \end{align*}
 $$
 
-Plots for the sampling distributions of t-values and parameter estimates are provided for each regressor. These are compared against the theoretical distribution of n samples where no model selection procedure is performed.
+Plots for the sampling distributions of t-values and parameter estimates are provided for each regressor. These are compared against the theoretical distribution of n samples where no model selection procedure is performed (red curve).
 
 # References
 
 Berk, R., Brown, L., & Zhao, L. (2010). Statistical Inference After Model Selection. Journal of Quantitative Criminology, 26(2), 217-236. https://doi.org/10.1007/s10940-009-9077-7
 
 Bias of an estimator. (2021, May 6). In Wikipedia. https://en.wikipedia.org/wiki/Bias_of_an_estimator
+
+Carmo, M. (2022, April 7). Simulating post selection inference. Retrieved from https://marwincarmo.github.io/posts/2021-12-20-model-selection-bias/
+
+## Contact
+
+If you see mistakes or want to suggest changes, please [create an issue](https://github.com/marwincarmo/model-selection-app/issues/new) on the source repository. You can also contact me by [email](mailto:marwinbr@gmail.com) or [twitter](https://twitter.com/marwincarmo).

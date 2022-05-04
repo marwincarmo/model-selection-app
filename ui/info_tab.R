@@ -3,6 +3,6 @@ info_tab <- tabItem(
   #setBackgroundColor("#808080"),
   fluidRow(
     column(width = 12,
-           withMathJax(includeMarkdown("R/info.rmd")))
+           withMathJax(includeMarkdown("R/info.Rmd")))
   ))
       

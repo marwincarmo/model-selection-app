@@ -9,6 +9,7 @@ suppressPackageStartupMessages({
     library(ggplot2)
     library(dplyr)
     library(MASS)
+    library(leaps)
     library(purrr)
     library(reactable)
     library(rmarkdown)
@@ -54,6 +55,11 @@ ui <- dashboardPage(
     )
 )
 
+periscope::downloadablePlotUI("sim_plot", 
+                              downloadtypes = c("png", "csv"), 
+                              download_hovertext = "Download the plot and data here!",
+                              height = "500px", 
+                              btn_halign = "left")
 
 
 ## server ----
@@ -156,17 +162,26 @@ server <- function(input, output, session) {
         progress$set(message = "Simulating datasets", value = 0)
         
         # simulation ----
+        # N_sims, N_predictors and sample size
         reps <- input$simulations
         p <- input$n_pred
         n <- input$sample_size
         # SNR can't be 0
         SNR <- input$snr
-        Sigma <- matrix(input$corr, p, p)
+        # Correlation matrix
+        cormat <- ifelse(input$cormatrix == "", "0.5", input$cormatrix)
+        corvals <- as.numeric(unlist(strsplit(cormat,",")))
+        Sigma <- matrix(rep(0,p*p), nrow=p)
+        Sigma[lower.tri(Sigma)] <-  corvals
+        Sigma <- t(Sigma)
+        Sigma[lower.tri(Sigma)] <-  corvals
         diag(Sigma) <- 1
+        # Coefficients
         b0 <- input$intercept
         beta <- purrr::map_dbl(predictors(), ~input[[.x]])
         selection <- input$fit_crit
         names(beta) <- paste0("x", 1:p)
+        # Record results
         coefs <- tvals <- matrix(NA, nrow = reps, ncol = p)
         cover <- matrix(0, nrow = reps, ncol = p)
         rsq <- NULL
@@ -177,34 +192,40 @@ server <- function(input, output, session) {
         
         # simulating model selection
         for (i in seq(reps)) {
+          
+          X <-  MASS::mvrnorm(n = n, rep(0, p) , Sigma)
+          y <- as.numeric(cbind(1, X) %*% c(b0, beta) + rnorm(n, 0, sigma_error))
+          Xy <- as.data.frame(cbind(X, y))
+          colnames(Xy) <- c(paste0("x", 1:p), "y")
+          fit <- lm(y ~ ., data = Xy)
+          if (selection == "AIC") {
+            sel <- step(fit, k = 2, trace = FALSE)
+          } else if (selection == "BIC") {
+            sel <- step(fit, k = log(n) , trace = FALSE)
+          } else if (selection == "Mallows's Cp") {
             
-            X <-  MASS::mvrnorm(n = n, rep(0, p) , Sigma)
-            y <- as.numeric(cbind(1, X) %*% c(b0, beta) + rnorm(n, 0, sigma_error))
-            Xy <- as.data.frame(cbind(X, y))
-            colnames(Xy) <- c(paste0("x", 1:p), "y")
-            fit <- lm(y ~ ., data = Xy)
-            if (selection == "AIC") {
-                sel <- step(fit, k = 2, trace = FALSE)
-            } else {
-                sel <- step(fit, k = log(n) , trace = FALSE)
-            }
-            s <- summary(sel)
-            tval <- s$coefficients[,3][-1]
-            tvals[i, names(tval)] <-  tval
-            coefs[i, names(tval)] <- coef(sel)[-1]
-            cis <- confint(sel)[-1,]
-            rsq[i] <- s$r.squared
-            # prevents failure if there is only one predictor selected
-            if (length(cis) < 3) {
-                cover[i,names(tval)] <- ifelse(cis[1] < beta[names(tval)] & 
-                                                 cis[2] > beta[names(tval)], 1, 0)
-            } else {
-                cover[i,names(tval)] <- ifelse(cis[names(tval),1] < beta[names(tval)] & 
-                                                 cis[names(tval),2] > beta[names(tval)], 1, 0)
-            }
-            # Increment the progress bar
-            progress$inc(1/reps, detail = paste("Doing part", i))
-            
+            models <- regsubsets(y ~ ., data = Xy, nvmax = p)
+            res.sum <- summary(models)
+            cpmod <- which.min(abs(res.sum$cp - p))
+            sel <- lm(get_model_formula(cpmod, models, "y"), data=Xy)
+          }
+          s <- summary(sel)
+          tval <- s$coefficients[,3][-1]
+          tvals[i, names(tval)] <-  tval
+          coefs[i, names(tval)] <- coef(sel)[-1]
+          cis <- confint(sel)[-1,]
+          rsq[i] <- s$r.squared
+          # prevents failure if there is only one predictor selected
+          if (length(cis) < 3) {
+            cover[i,names(tval)] <- ifelse(cis[1] < beta[names(tval)] & 
+                                             cis[2] > beta[names(tval)], 1, 0)
+          } else {
+            cover[i,names(tval)] <- ifelse(cis[names(tval),1] < beta[names(tval)] & 
+                                             cis[names(tval),2] > beta[names(tval)], 1, 0)
+          }
+          # Increment the progress bar
+          progress$inc(1/reps, detail = paste("Doing part", i))
+          
         }
         
         # results dataframe ----
@@ -214,7 +235,6 @@ server <- function(input, output, session) {
             Coverage = colMeans(cover),
             Bias = colMeans((coefs - beta), na.rm = TRUE),
             MSE = colMeans((coefs - beta)^2, na.rm = TRUE)
-            
         )
         
         # simulating estimates from full model
@@ -250,7 +270,10 @@ server <- function(input, output, session) {
         output$rsq_output <- renderUI({
             withMathJax(
                 helpText(
-                paste0("The mean \\(R^2\\) value is ", round(mean(rsq), 3))))
+                paste0("The mean \\(R^2\\) value was ", round(mean(rsq), 3), 
+                       ". The true model was captured by the final model ", 
+                       (length(tvals[complete.cases(tvals),])/p)/reps*100,
+                       "% of the times.")))
         })
 
         # res_table ----
@@ -292,7 +315,5 @@ shinyApp(ui, server)
 
 ## To do:
 ## blank table if no data is generated yet
-## correlation matrix
-## remake plot
 ## download results button
 ## interactions
