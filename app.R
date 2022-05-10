@@ -135,16 +135,16 @@ server <- function(input, output, session) {
         is_pos <- input$sample_size >= 1
         is_greater_zero <- input$snr > 0
         non_zero_pred <- input$n_pred > 0
-        is_bounded <- (input$corr >= -1) & (input$corr <= 1)
+        #is_bounded <- (input$corr >= -1) & (input$corr <= 1)
         
         if(!is_integer || !is_pos){
             shiny::showNotification("Please fix sample size value. Choose an integer greater than zero.")
             return()
         }
-        if(!is_bounded){
-            shiny::showNotification("Please choose a correlation value between -1 and 1.")
-            return()
-        }
+        # if(!is_bounded){
+        #     shiny::showNotification("Please choose a correlation value between -1 and 1.")
+        #     return()
+        # }
         if(!is_greater_zero){
             shiny::showNotification("The SNR must be greater than 0!")
             return()
@@ -202,7 +202,7 @@ server <- function(input, output, session) {
             sel <- step(fit, k = 2, trace = FALSE)
           } else if (selection == "BIC") {
             sel <- step(fit, k = log(n) , trace = FALSE)
-          } else if (selection == "Mallows's Cp") {
+          } else if (selection == "Mallows' Cp") {
             
             models <- regsubsets(y ~ ., data = Xy, nvmax = p)
             res.sum <- summary(models)

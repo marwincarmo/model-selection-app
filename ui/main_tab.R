@@ -12,16 +12,10 @@ sim_tab <- tabItem(
                          value = 1000,
                          min = 1,
                          step = 50),
-            numericInput(inputId = "corr",
-                         label = "Correlation",
-                         value = 0.5,
-                         min = -1,
-                         max = 1,
-                         step = 0.1),
             textAreaInput(inputId = "cormatrix", label = "Correlation matrix (defaults to 0.5 if blank)", value = "", 
                           width = NULL, height = NULL,
                           cols = NULL, rows = 7, resize = "vertical",
-                          placeholder = "Enter the off-diagonal correlation matrix entries separated by commas. Use a single value if you want to make all relationships equal.
+                          placeholder = "Enter the predictor's correlation matrix off-diagonal entries separated by commas. Use a single value if you want to make all relationships equal.
 Ex: .4, .5, .3 will output:
      [,1] [,2] [,3]
 [1,]  1.0  0.4  0.5
@@ -35,9 +29,6 @@ Ex: .4, .5, .3 will output:
             numericInput(inputId = "intercept",
                          label = "Intercept",
                          value = 1),
-            # numericInput(inputId = "coefs",
-            #              label = "True coefficient value",
-            #              value = 1),
             numericInput(inputId = "snr",
                          label = "Signal-to-Noise Ratio",
                          min = 0,
@@ -45,7 +36,7 @@ Ex: .4, .5, .3 will output:
                          step = .1),
             selectInput(inputId = "fit_crit",
                         label = "Fit criterion",
-                        choices = c("AIC", "BIC", "Mallows's Cp")
+                        choices = c("AIC", "BIC", "Mallows' Cp")
             ),
             actionButton("simulate", "Simulate"))),
     column(width = 6,
